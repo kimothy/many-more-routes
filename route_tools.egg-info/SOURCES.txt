@@ -1,7 +1,0 @@
-setup.py
-route_tools.egg-info/PKG-INFO
-route_tools.egg-info/SOURCES.txt
-route_tools.egg-info/dependency_links.txt
-route_tools.egg-info/not-zip-safe
-route_tools.egg-info/requires.txt
-route_tools.egg-info/top_level.txt
