@@ -1,13 +1,13 @@
 import setuptools
 
 setuptools.setup(
-    name='route_tools',
-    version='0.1',
-    description='A collection of tooles used for the route sequence',
-    url='#',
+    name='many-more-routes',
+    version='1',
+    description='A collection of tools to configure routes for M3',
+    url='github.com/kimothy/many-more-routes',
     author='Kim Timothy Engh',
     install_requires=['pandas', 'pandera', 'openpyxl'],
     author_email='kim.timothy.engh@epiroc.com',
-    packages=setuptools.find_packages(),
+    packages=['outputs', 'procedures', 'sequence', 'templates'],
     zip_safe=False
 )
