@@ -34,6 +34,19 @@ def _validate_seed(sequenceNumber: str) -> None:
     elif not sequenceNumber[2:].isdigit():
         raise ValueError('The last four chars of the sequence number has to be numeric')
 
+
+def is_sequenceNumber_valid(sequenceNumber: str):
+    ''' Returns True if seed is valid, else False. Can be used in a functional way
+    to determine if a sequence number is valid or not, or to filter out route names that follows
+    an different route name scheme in combination with the standard python filter function '''
+    try:
+        _validate_seed(sequenceNumber=sequenceNumber)
+        return True
+
+    except ValueError:
+        return False
+
+
 def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> List[str]:
     '''Returns a sequence generator. If n is not given it will loop infinitely'''
     if n:

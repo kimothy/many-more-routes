@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "many-more-routes"
+version = "0.1.0"
+description = "Routing tools for the More project"
+authors = ["Kim TImothy Engh <kimothy@users.noreply.github.com>"]
+license = "GPLv3"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+getting-and-setting = "^0.2.2"
+pandas = "^1.4.2"
+pandera = "openpyxml"
+openpyxl = "^3.0.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "poetry"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
