@@ -1,15 +1,14 @@
 [tool.poetry]
 name = "many-more-routes"
-version = "0.1.0"
+version = "0.1.3"
 description = "Routing tools for the More project"
 authors = ["Kim TImothy Engh <kimothy@users.noreply.github.com>"]
 license = "GPLv3"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-getting-and-setting = "^0.2.2"
-pandas = "^1.4.2"
-pandera = "openpyxml"
+python = "^3.10"
+getting-and-setting = "^0.3.19"
+pandera = "^0.11.0"
 openpyxl = "^3.0.9"
 
 [tool.poetry.dev-dependencies]
