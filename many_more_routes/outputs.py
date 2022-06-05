@@ -81,14 +81,22 @@ def export(df: pd.DataFrame, sheet: str, desc: Optional[List[str]] = '', mandeto
     to_excel(df, sheet)
 
 
-def export_many(dfs: List[pd.DataFrame], sheets: List[str]):
+def export_many(dfs: List[pd.DataFrame], sheets: List[str], filepath: str = None):
     '''Takes a lists of dataframes and a list of sheet names and adds all of them to
     a single excel file to be used with SmartDataTool. Normally the sheet name should
     corresond with the sheet name SmartDataTool is looking for per specific API.
     '''
-    with NamedTemporaryFile(prefix='Route_Set-up_', suffix='.xlsx', delete=False) as f:
-         with pd.ExcelWriter(f.name, engine='openpyxl') as w:
-             for df, sheet in zip(dfs, sheets):
-                 df.to_excel(w, index=False, sheet_name = sheet)
 
-         open_in_excel(f.name)
+    if filepath:
+        with open(filepath, 'wb') as f:
+            with pd.ExcelWriter(f.name, engine='openpyxl') as w:
+                for df, sheet in zip(dfs, sheets):
+                    df.to_excel(w, index=False, sheet_name = sheet)
+
+    else:
+        with NamedTemporaryFile(prefix='Route_Set-up_', suffix='.xlsx', delete=False) as f:
+            with pd.ExcelWriter(f.name, engine='openpyxl') as w:
+                for df, sheet in zip(dfs, sheets):
+                    df.to_excel(w, index=False, sheet_name = sheet)
+
+            open_in_excel(f.name)
