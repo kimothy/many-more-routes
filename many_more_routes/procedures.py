@@ -27,7 +27,8 @@ def export_template_dataframe_to_smartsheet(template: Template, route_seed: Opti
     customer_extension_extended_table = make_customer_extension_extended(template)
 
     export_many(
-        [   template.fillna(''),
+        [   
+            template.fillna(''),
             to_smart_format(route_table.fillna('')),
             to_smart_format(departure_table.fillna('')),
             to_smart_format(selection_table.fillna('')),

@@ -20,55 +20,16 @@ Created for the More program template
 """
 
 import pandas as pd
+import numpy as np
 from . import sequence
 from . schema import TemplateSchema
 from typing import Optional, List, Union, NewType
 import datetime
 
+Int8 = NewType('Int8', pd.core.arrays.integer.Int8Dtype)
+Object = NewType('Object', np.object_)
 
-class Template(pd.DataFrame):
-    '''
-    Template object that represents the template file
-    '''
-    self: pd.DataFrame
-
-    COLUMNS = {
-        'Route': object,
-        'PlaceOfLoad': str,
-        'PlaceOfUnload': str,
-        'DeliveryMethod': str,
-        'RouteDeparture': object,
-        'DepartureDays': str,
-        'LeadTime': 'int8',
-        'LeadTimeOffset': 'int8',
-        'ForwardingAgent': str,
-        'TransportationEquipment': str,
-        'DaysToDeadline': 'int8',
-        'DeadlineHours': 'int8',
-        'DeadlineMinutes': 'int8',
-        'PickCutOffDays': 'int8',
-        'PickCutOffTimeHours': 'int8',
-        'PickCutOffTimeMinutes': 'int8',
-        'StipulatedInternalLeadTimeHours': 'int8',
-        'StipulatedInternalLeadTimeDays': 'int8',
-        'StipulatedInternalLeadTimeMinutes': 'int8',
-        'ForwardersArrivalLeadTimeDays': 'int8',
-        'ForwardersArrivalLeadTimeHours': 'int8',
-        'ForwardersArrivalLeadTimeMinutes': 'int8',
-        'TimeOfDepartureHours': 'int8',
-        'TimeOfDepartureMinutes': 'int8',
-        'TimeOfArrivalHoursLocalTime': 'int8',
-        'TimeOfArrivalMinutesLocalTime': 'int8',
-        'RouteResponsible': str,
-        'DepartureResponsible': str,
-        'CustomsDeclaration': int,
-        'AvoidConfirmedDeliveryOnWeekends': int,
-        'CreateSmartSheets': int,
-        'Comment': object
-    }
-
-Template                  = NewType('Template, pd.DateFrame')
-InvalidTemplate           = NewType('InvalidTemplate, pd.DateFrame')
+Template                  = NewType('Template', pd.DataFrame)
 Routes                    = NewType('Routes', pd.DataFrame)
 Departures                = NewType('Departures', pd.DataFrame)
 Selection                 = NewType('Selection', pd.DataFrame)
@@ -76,51 +37,20 @@ CustomerExtension         = NewType('CustomerExtension', pd.DataFrame)
 CustomerExtensionExtended = NewType('CustomerExtensionExtended', pd.DataFrame)
 
 
-def load_template(template: Union[str, pd.DataFrame]) -> Template:
-    '''
-    Takes a path or a dataframe and returns a dataframe of type Template.
-    '''
-
-    if isinstance(template, str):
-        template = Template(
-            pd.read_excel(
-                template,
-                dtype=object,
-                sheet_name='TEMPLATE_V3'
-                )
-            )
-    
-    elif isinstance(template, pd.DataFrame):
-        template = Template(template)
-
-        template.dropna(axis='index', subset=['PlaceOfLoad'], inplace=True)
-        template.astype(template.COLUMNS, errors='ignore')
-
-        for column, dtype in template.COLUMNS.items():
-            template[column] = template[column].astype(dtype, errors='ignore')
-
-        template['PlaceOfUnload'] = template.apply(
-            lambda x: x['PlaceOfUnload'].split(','), axis=1
-        )
-
-        template = template.explode('PlaceOfUnload', ignore_index=True)
-        template = template[template['CreateSmartSheets'] == True]
-
-    else:
-        raise TypeError("load_template requires a df with correct set-up or a path to a template file")
-
-
-    return template
-
-
 def load_template(path: str) -> Template:
     template = pd.read_excel(path, sheet_name='TEMPLATE_V3')
 
     validated_template = TemplateSchema.validate(template)
-    return validated_template
     
+    for column in validated_template.columns:
+        if pd.api.types.is_integer_dtype(validated_template[column].dtype):
+            validated_template[column].fillna(0, inplace=True)
 
+        elif pd.api.types.is_object_dtype(validated_template[column].dtype):
+            validated_template[column].fillna('', inplace=True)
 
+    return validated_template
+  
 
 def assign_routes(routes: pd.array, seed: Optional[str] = None, overwrite: bool = True) -> pd.array:
     '''
@@ -149,7 +79,7 @@ def make_route_table(template: Template) -> Routes:
     Creates a route dataframe based on a Template object
     '''
 
-    routes = Routes()
+    routes = pd.DataFrame()
     routes['ROUT'] = template['Route']
     routes['RUTP'] = 6
     routes['TX40'] = template['PlaceOfLoad'].astype('str')\
@@ -176,7 +106,7 @@ def make_route_table(template: Template) -> Routes:
     routes['LOBL'] = ''
     routes['LODO'] = ''
 
-    return routes
+    return Routes(routes)
 
 
 
@@ -217,7 +147,7 @@ def calc_departures(departureDays: str, leadTime: int) -> List[str]:
     return sorted(departures, reverse=True)
 
       
-def recalculate_lead_time(departureDays: str, leadTime: int) -> int:
+def recalculate_lead_time(departureDays: str, leadTime: int) -> Optional[int]:
     '''
     Takes the departure days and lead time, selects the first
     departure days and caluclates the arrival day, if on a weekday
@@ -237,7 +167,7 @@ def recalculate_lead_time(departureDays: str, leadTime: int) -> int:
         return leadTime + 1
 
 
-def calc_route_departure(departureDays: str, leadTime: int) -> int:
+def calc_route_departure(departureDays: str, leadTime: int) -> Optional[int]:
     '''
     Takes the departure days and lead time, selects the first
     departure days and caluclates the arrival day, if on a weekday
@@ -306,7 +236,7 @@ def make_departure_table(template: Template) -> Departures:
     )
 
     
-    departures = Departures()
+    departures = pd.DataFrame()
     departures['WWROUT'] = template['Route']
     departures['WWRODN'] = template['RouteDeparture']
     departures['WRRESP'] = template['DepartureResponsible']
@@ -332,14 +262,14 @@ def make_departure_table(template: Template) -> Departures:
     departures['WRARHH'] = template['TimeOfArrivalHoursLocalTime']
     departures['WRARMM'] = template['TimeOfArrivalMinutesLocalTime']
 
-    return departures
+    return Departures(departures)
 
 
 def make_selection_table(template: Template) -> Selection:
     '''
     Makes the DRS011 selection table based on the template
     '''
-    selection = Selection()
+    selection = pd.DataFrame()
 
     LOLD = template.apply(
         lambda x: x['LeadTime']\
@@ -368,12 +298,12 @@ def make_selection_table(template: Template) -> Selection:
     selection['WFLOLH'] = ''
     selection['WFLOLM'] = ''
 
-    return selection
+    return Selection(selection)
 
 
 def make_customer_extension(template: Template) -> CustomerExtension:
 
-    customer_extension = CustomerExtension(
+    customer_extension = pd.DataFrame(
         columns=[
             'FILE',
             'PK01',
@@ -409,7 +339,8 @@ def make_customer_extension(template: Template) -> CustomerExtension:
         ]
     )
 
-    droudi = template.query('(PickCutOffDays or PickCutOffDays or PickCutOffTimeMinutes)')[['Route', 'PickCutOffDays', 'PickCutOffTimeHours', 'PickCutOffTimeMinutes']]
+    droudi = template.query('(PickCutOffDays > 0 or PickCutOffTimeHours > 0 or PickCutOffTimeMinutes > 0)')\
+        [['Route', 'PickCutOffDays', 'PickCutOffTimeHours', 'PickCutOffTimeMinutes']]
     customer_extension_droudi = customer_extension.copy()
     customer_extension_droudi['PK01'] = droudi['Route']
     customer_extension_droudi['N096'] = droudi['PickCutOffDays']
@@ -424,12 +355,12 @@ def make_customer_extension(template: Template) -> CustomerExtension:
 
     customer_extension = pd.concat([customer_extension, customer_extension_droudi, customer_extension_droute])
 
-    return customer_extension.reset_index().drop(columns=['index'])
+    return CustomerExtension(customer_extension.reset_index().drop(columns=['index']))
     
 
 def make_customer_extension_extended(template: Template) -> CustomerExtensionExtended:
 
-    customer_extension_extended = CustomerExtensionExtended(
+    customer_extension_extended = pd.DataFrame(
         columns=[
             'FILE',
             'PK01',
@@ -471,4 +402,4 @@ def make_customer_extension_extended(template: Template) -> CustomerExtensionExt
 
     customer_extension_extended = pd.concat([customer_extension_extended, customer_extension_extended_droute])
 
-    return customer_extension_extended.reset_index().drop(columns=['index'])
+    return CustomerExtensionExtended(customer_extension_extended.reset_index().drop(columns=['index']))
