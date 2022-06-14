@@ -66,35 +66,13 @@ class Template(pd.DataFrame):
         'Comment': object
     }
 
-
-
-class Routes(pd.DataFrame):
-    '''
-    Dataframe for the routes DRS005
-    '''
-    self: pd.DataFrame
-
-class Departures(pd.DataFrame):
-    '''
-    Dataframe for the routes DRS006
-    '''
-    self: pd.DataFrame
-
-class Selection(pd.DataFrame):
-    '''
-    Dataframe for the route selection DRS011
-    '''
-    self: pd.DataFrame
-
-class CustomerExtension(pd.DataFrame):
-    '''
-    Dataframe for CUGEX1 template
-    '''
-
-class CustomerExtensionExtended(pd.DataFrame):
-    '''
-    Dataframe for CUGEX1 template, extended fields
-    '''
+Template                  = NewType('Template, pd.DateFrame')
+InvalidTemplate           = NewType('InvalidTemplate, pd.DateFrame')
+Routes                    = NewType('Routes', pd.DataFrame)
+Departures                = NewType('Departures', pd.DataFrame)
+Selection                 = NewType('Selection', pd.DataFrame)
+CustomerExtension         = NewType('CustomerExtension', pd.DataFrame)
+CustomerExtensionExtended = NewType('CustomerExtensionExtended', pd.DataFrame)
 
 
 def load_template(template: Union[str, pd.DataFrame]) -> Template:
