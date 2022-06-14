@@ -1,0 +1,41 @@
+from pandera import DataFrameSchema, Column, Index
+
+TemplateSchema = DataFrameSchema(
+    {
+        "Route": Column("str", nullable=True, required=True),
+        "PlaceOfLoad": Column("str", nullable=False, required=True),
+        "PlaceOfUnload": Column("str", nullable=False, required=True),
+        "DeliveryMethod": Column("str", nullable=False, required=True),
+        "RouteDeparture": Column("str", nullable=True, required=False),
+        "DepartureDays": Column("str", nullable=False, required=True),
+        "ForwardingAgent": Column("str", nullable=False, required=True),
+        "LeadTime": Column("Int8", nullable=False, required=True),
+        "LeadTimeOffset": Column("Int8", nullable=True, required=False),
+        "TransportationEquipment": Column("str", nullable=True, required=False),
+        "DaysToDeadline": Column("Int8", nullable=True, required=False),
+        "DeadlineHours": Column("Int8", nullable=True, required=True),
+        "DeadlineMinutes": Column("Int8", nullable=True, required=False),
+        "PickCutOffDays": Column("Int8", nullable=True, required=False),
+        "PickCutOffTimeHours": Column("Int8", nullable=True, required=False),
+        "PickCutOffTimeMinutes": Column("Int8", nullable=True, required=False),
+        "StipulatedInternalLeadTimeHours": Column("Int8", nullable=True, required=False),
+        "StipulatedInternalLeadTimeDays": Column("Int8", nullable=True, required=False),
+        "StipulatedInternalLeadTimeMinutes": Column("Int8", nullable=True, required=False),
+        "ForwardersArrivalLeadTimeDays": Column("Int8", nullable=True, required=False),
+        "ForwardersArrivalLeadTimeHours": Column("Int8", nullable=True, required=False),
+        "ForwardersArrivalLeadTimeMinutes": Column("Int8", nullable=True, required=False),
+        "TimeOfDepartureHours": Column("Int8", nullable=True, required=False),
+        "TimeOfDepartureMinutes": Column("Int8", nullable=True, required=False),
+        "TimeOfArrivalHoursLocalTime": Column("Int8", nullable=True, required=False),
+        "TimeOfArrivalMinutesLocalTime": Column("Int8", nullable=True, required=False),
+        "RouteResponsible": Column("str", nullable=True, required=False),
+        "DepartureResponsible": Column("str", nullable=True, required=False),
+        "CustomsDeclaration": Column("Int8", nullable=True, required=False),
+        "AvoidConfirmedDeliveryOnWeekends": Column("Int8", nullable=True, required=False),
+        "CreateSmartSheets": Column("Int8", nullable=True, required=False),
+        "Comment": Column("str", nullable=True, required=False)
+    },
+    index=Index(int),
+    strict=True,
+    coerce=True
+)
