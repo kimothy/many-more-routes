@@ -21,7 +21,8 @@ Created for the More program template
 
 import pandas as pd
 from . import sequence
-from typing import Optional, List, Union
+from . schema import TemplateSchema
+from typing import Optional, List, Union, NewType
 import datetime
 
 
@@ -88,6 +89,7 @@ def load_template(template: Union[str, pd.DataFrame]) -> Template:
                 sheet_name='TEMPLATE_V3'
                 )
             )
+    
     elif isinstance(template, pd.DataFrame):
         template = Template(template)
 
@@ -109,6 +111,15 @@ def load_template(template: Union[str, pd.DataFrame]) -> Template:
 
 
     return template
+
+
+def load_template(path: str) -> Template:
+    template = pd.read_excel(path, sheet_name='TEMPLATE_V3')
+
+    validated_template = TemplateSchema.validate(template)
+    return validated_template
+    
+
 
 
 def assign_routes(routes: pd.array, seed: Optional[str] = None, overwrite: bool = True) -> pd.array:
