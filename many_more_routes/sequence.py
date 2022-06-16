@@ -60,7 +60,6 @@ def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) ->
             yield sequenceNumber
         
 
-
 def _next(sequenceNumber: Optional[str] = None) -> str:
     '''Taked a route sequence number and incriments by one.'''
     if sequenceNumber:
@@ -82,8 +81,7 @@ def _incrementAlpha(alpha: str) -> str:
     >>> incrementAlpha('AA')
     'AB'
     >>> incrementAlpha('ZZ')
-    'AA'
-    
+    'AA'   
     '''
     assert any(map(lambda x: x.isalpha(), alpha))
 
@@ -96,7 +94,6 @@ def _incrementAlpha(alpha: str) -> str:
             break
 
     return ''.join(reversed(alphaArray))
-
 
 
 def _incrementDigit(alpha: str) -> str:

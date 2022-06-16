@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "many-more-routes"
-version = "0.1.3"
+version = "0.2.0"
 description = "Routing tools for the More project"
 authors = ["Kim TImothy Engh <kimothy@users.noreply.github.com>"]
 license = "GPLv3"
