@@ -1,14 +1,14 @@
-from typing import Optional, List
+from typing import Optional, List, Generator
 
-def next(sequenceNumber: Optional[str] = None) -> str:
+def increment(sequenceNumber: Optional[str] = None) -> str:
     '''Taked a route sequence number and incriments by one.
-    >>> next(None)
+    >>> increment(None)
     'AA0001'
-    >>> next('AA0001')
+    >>> increment('AA0001')
     'AA0002'
-    >>> next('AA9999')
+    >>> increment('AA9999')
     'AB0001'
-    >>> next('ZZ9999')
+    >>> increment('ZZ9999')
     'AA0001'
     '''
     if sequenceNumber:
@@ -17,7 +17,7 @@ def next(sequenceNumber: Optional[str] = None) -> str:
     return _next(sequenceNumber)
 
 
-def generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> List[str]:
+def generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> Generator:
     '''Returns a sequence generator. If n is not given it will loop infinitely'''
     if sequenceNumber:
         _validate_seed(sequenceNumber)
@@ -47,7 +47,7 @@ def is_sequenceNumber_valid(sequenceNumber: str):
         return False
 
 
-def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> List[str]:
+def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> Generator:
     '''Returns a sequence generator. If n is not given it will loop infinitely'''
     if n:
         for _ in range(n):
@@ -67,7 +67,7 @@ def _next(sequenceNumber: Optional[str] = None) -> str:
         digit = sequenceNumber[2:]
 
         newDigit = _incrementDigit(digit)
-        newAlpha = _incrementAlpha(alpha) if newDigit == next()[2:] else alpha
+        newAlpha = _incrementAlpha(alpha) if newDigit == increment()[2:] else alpha
 
         return newAlpha + newDigit
 
