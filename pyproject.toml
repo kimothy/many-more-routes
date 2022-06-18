@@ -6,7 +6,7 @@ authors = ["Kim TImothy Engh <kimothy@users.noreply.github.com>"]
 license = "GPLv3"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9  "
 getting-and-setting = "^0.3.19"
 openpyxl = "^3.0.9"
 pydantic = "^1.9.1"
@@ -17,3 +17,6 @@ pytest = "poetry"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+mmrcli = "many_more_routes.cli:cli"
