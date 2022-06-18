@@ -1,4 +1,4 @@
-from typing import Optional, List, Generator
+from typing import Optional, Generator
 
 def increment(sequenceNumber: Optional[str] = None) -> str:
     '''Taked a route sequence number and incriments by one.
@@ -49,8 +49,11 @@ def is_sequenceNumber_valid(sequenceNumber: str):
 
 def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> Generator:
     '''Returns a sequence generator. If n is not given it will loop infinitely'''
+    if sequenceNumber:
+        yield sequenceNumber
+
     if n:
-        for _ in range(n):
+        for _ in range(n - 1):
             sequenceNumber = _next(sequenceNumber)
             yield sequenceNumber
 
