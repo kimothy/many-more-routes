@@ -5,12 +5,8 @@ from pathlib import Path
 from typing import List
 from typing import Dict
 from typing import Optional
-from typing import Protocol
+from . models import OutputRecord
 
-class OutputRecord(Protocol):
-    _api: str
-    
-    def dict(self) -> Dict: ...
 
 
 def load_excel(file_path: str|Path, sheet_name: Optional[str] = None) -> List[Dict]:
