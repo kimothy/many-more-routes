@@ -1,9 +1,7 @@
 from pydantic import Field
 from pydantic import BaseModel
-from pydantic import constr
 from pydantic import PositiveInt
 from pydantic import PrivateAttr
-from pydantic import validator
 from pydantic.validators import str_validator
 
 from typing import Optional
@@ -14,12 +12,12 @@ REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
 REGEX_STR_PLACE_OF_LOAD = "^[A-Z]{3}"
 REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
-
+REGEX_STR_DELIVERY_METHOD = "^\d{2}|\d{3}$"
 
 class OutputRecord(Protocol):
     _api: str
-    
     def dict(self) -> Dict: ...
+    def schema(self) -> Dict: ...
 
 def empty_to_none(v: int|str|float|None) -> Optional[str]:
     if v in [0, 0.0, '', None]:
@@ -34,18 +32,15 @@ class NoneInt(PositiveInt):
         yield str_validator
         yield empty_to_none
 
-class Output(BaseModel):
-    _api: str
-
 
 class Template(BaseModel):
     _api: str = PrivateAttr(default='TEMPLATE_V3')
-    Route: Optional[str] = Field(..., strip_whitespace=True, regex=REGEX_STR_ROUTE)
-    DeliveryMethod: str
-    PlaceOfLoad: constr(strip_whitespace=True, regex=REGEX_STR_PLACE_OF_LOAD)
-    PlaceOfUnload: constr(strip_whitespace=True, regex=REGEX_STR_PLACE_OF_UNLOAD)
+    Route: Optional[str] = Field(..., name='Route', alias='Route',  description='The unique route name', strip_whitespace=True, regex=REGEX_STR_ROUTE)
+    DeliveryMethod: str = Field(..., name='Mode of Transport', alias='DeliveryMethod', description='The mode of transport', strip_whitespace=True, regex=REGEX_STR_DELIVERY_METHOD)
+    PlaceOfLoad: str = Field(..., name='Place of load', strip_whitespace=True, regex=REGEX_STR_PLACE_OF_LOAD)
+    PlaceOfUnload: str = Field(..., strip_whitespace=True, regex=REGEX_STR_PLACE_OF_UNLOAD)
     RouteDeparture: Optional[int]
-    DepartureDays: constr(strip_whitespace=True, regex=REGEX_STR_DEPARTURE_DAYS)
+    DepartureDays: str = Field(..., strip_whitespace=True, regex=REGEX_STR_DEPARTURE_DAYS)
     ForwardingAgent: Optional[str]
     LeadTime: PositiveInt
     LeadTimeOffset: Optional[NoneInt]
@@ -72,20 +67,6 @@ class Template(BaseModel):
     AvoidConfirmedDeliveryOnWeekends: Optional[bool]
     CreateSmartSheets: Optional[bool]
     Comment: Optional[str]
-
-    @validator('DepartureDays')
-    def departure_days_validation(cls, v):
-        if not all([c for c in list(str(v)) if c in ['0', '1']]) or len(str(v)) != 7:
-            raise ValueError('Invalid departure days. All days of week should have 0 or 1 assigned')
-
-        return str(v)
-
-    @validator('DeliveryMethod')
-    def delivery_method_validation(cls, v):
-        if not all([c.isdigit() for c in list(str(v))]):
-            raise ValueError('Invalid delivery method')
-
-        return str(v)
 
 
 class Route(BaseModel):
@@ -126,13 +107,6 @@ class Departure(BaseModel):
     WRARDY: Optional[int]
     WRARHH: Optional[int]
     WRARMM: Optional[int]
-
-    @validator('WWRODN')
-    def validate_rodn(cls, v):
-        if v == 0:
-            ValueError('Route Departure (RODN) must be greater then 0')
-        
-        return v
 
 
 class Selection(BaseModel):

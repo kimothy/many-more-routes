@@ -1,4 +1,6 @@
+from ctypes import alignment
 import openpyxl
+from openpyxl.styles import Alignment
 
 from pathlib import Path
 
@@ -9,6 +11,23 @@ from typing import Union
 
 from . models import OutputRecord
 
+
+ALIGNMENT_ROTATE = Alignment(
+    horizontal='left',
+    vertical='bottom',
+    text_rotation=55,
+    shrink_to_fit=False,
+    wrap_text=False,
+    indent=0
+)
+
+ALIGNMENT_FLAT = Alignment(
+    horizontal='general',
+    text_rotation=0,
+    shrink_to_fit=False,
+    wrap_text=False,
+    indent=0
+)
 
 
 def load_excel(file_path: Union[str, Path], sheet_name: Optional[str] = None) -> List[Dict]:
@@ -59,10 +78,13 @@ def write_excel(records: List[OutputRecord], file_path: Union[str, Path]) -> Non
 
             sheet = workbook[record._api]
             sheet.cell(1, 1, 'Message')
+            sheet.cell(2, 1, 'Message').alignment = ALIGNMENT_ROTATE
             sheet.cell(3, 1, 'no')
 
-            for index, value in enumerate(iterable=record.dict().keys(), start=2):
-                sheet.cell(1, index, value)
+            for index, (key, value) in enumerate(iterable=record.schema()['properties'].items(), start=2):
+                print(key, value, '\n\n\n')
+                sheet.cell(1, index, key)
+                sheet.cell(2, index, value['title']).alignment = ALIGNMENT_ROTATE
                 sheet.cell(3, index, 'yes')
 
             counts[record._api] = 4

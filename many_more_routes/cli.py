@@ -24,7 +24,7 @@ def main(infile: str, outfile: str, seed: str):
     records = map(lambda x: Template(**x), load_excel(infile))
 
     results: List[OutputRecord] = []
-    for record in records:
+    for index, record in enumerate(records, 2):
         if not record.Route:
             record.Route = next(routegen)
 
@@ -51,7 +51,7 @@ def cli():
     parser = ArgumentParser(
         prog='many-more-routes-cli',
         description='Route Generation Program',
-        epilog='The epilog, update me!'
+        epilog='Written to generate route configuration for DRS005, DRS006, DRS011 and CUGEX'
     )
 
     parser.add_argument(
