@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic import BaseModel
 from pydantic import constr
 from pydantic import PositiveInt
@@ -6,12 +7,19 @@ from pydantic import validator
 from pydantic.validators import str_validator
 
 from typing import Optional
+from typing import Protocol
+from typing import Dict
 
 REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
 REGEX_STR_PLACE_OF_LOAD = "^[A-Z]{3}"
 REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
 
+
+class OutputRecord(Protocol):
+    _api: str
+    
+    def dict(self) -> Dict: ...
 
 def empty_to_none(v: int|str|float|None) -> Optional[str]:
     if v in [0, 0.0, '', None]:
@@ -26,10 +34,13 @@ class NoneInt(PositiveInt):
         yield str_validator
         yield empty_to_none
 
+class Output(BaseModel):
+    _api: str
+
 
 class Template(BaseModel):
-    _api = PrivateAttr(default='TEMPLATE_V3')
-    Route: constr(strip_whitespace=True, regex=REGEX_STR_ROUTE)
+    _api: str = PrivateAttr(default='TEMPLATE_V3')
+    Route: Optional[str] = Field(..., strip_whitespace=True, regex=REGEX_STR_ROUTE)
     DeliveryMethod: str
     PlaceOfLoad: constr(strip_whitespace=True, regex=REGEX_STR_PLACE_OF_LOAD)
     PlaceOfUnload: constr(strip_whitespace=True, regex=REGEX_STR_PLACE_OF_UNLOAD)
@@ -183,7 +194,7 @@ class CustomerExtension(BaseModel):
 
 class CustomerExtensionExtended(BaseModel):
     _api: str = PrivateAttr(default='API_CUSEXTMI_ChgFieldValueEx')
-    FILE: Optional[str]
+    FILE: str
     PK01: Optional[str]
     PK02: Optional[str]
     PK03: Optional[str]
