@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import List
 from typing import Dict
 from typing import Optional
+from typing import Union
+
 from . models import OutputRecord
 
 
 
-def load_excel(file_path: str|Path, sheet_name: Optional[str] = None) -> List[Dict]:
+def load_excel(file_path: Union[str, Path], sheet_name: Optional[str] = None) -> List[Dict]:
     """ Loads an excel to a list of dictionaries where the first row is the column headers """
 
     if isinstance(file_path, str):
@@ -35,7 +37,7 @@ def load_excel(file_path: str|Path, sheet_name: Optional[str] = None) -> List[Di
     ]
 
 
-def write_excel(records: List[OutputRecord], file_path: str|Path) -> None:
+def write_excel(records: List[OutputRecord], file_path: Union[str, Path]) -> None:
     if isinstance(file_path, str):
         file_path = str(Path(file_path).absolute())
     else:

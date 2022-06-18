@@ -2,7 +2,7 @@ from .models import CustomerExtension, CustomerExtensionExtended, Template
 from .models import Departure
 from .models import Route
 from .models import Selection
-from typing import List, Tuple
+from typing import List
 from datetime import datetime
 from .methods import calc_departures, calc_route_departure, recalculate_lead_time
 
