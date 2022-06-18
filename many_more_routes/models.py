@@ -1,21 +1,17 @@
-from collections import Counter
-from functools import reduce
-from pydantic import BaseModel, Field, constr, PositiveInt, root_validator, PrivateAttr
+from pydantic import BaseModel
+from pydantic import constr
+from pydantic import PositiveInt
+from pydantic import PrivateAttr
 from pydantic import validator
-from pydantic import StrictStr
 from pydantic.validators import str_validator
+
 from typing import Optional
-from typing import List
-from re import compile
 
 REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
 REGEX_STR_PLACE_OF_LOAD = "^[A-Z]{3}"
 REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
 
-class DuplicateError(Exception):
-    ...
-    
 
 def empty_to_none(v: int|str|float|None) -> Optional[str]:
     if v in [0, 0.0, '', None]:
