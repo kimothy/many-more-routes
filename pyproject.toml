@@ -7,7 +7,6 @@ license = "GPLv3"
 
 [tool.poetry.dependencies]
 python = "^3.9  "
-getting-and-setting = "^0.3.19"
 openpyxl = "^3.0.9"
 pydantic = "^1.9.1"
 
