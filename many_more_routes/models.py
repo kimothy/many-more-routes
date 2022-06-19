@@ -7,6 +7,7 @@ from pydantic.validators import str_validator
 from typing import Optional
 from typing import Protocol
 from typing import Dict
+from typing import runtime_checkable
 
 REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
 REGEX_STR_PLACE_OF_LOAD = "^[A-Z]{3}"
@@ -14,10 +15,17 @@ REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
 REGEX_STR_DELIVERY_METHOD = "^\d{2}|\d{3}$"
 
+@runtime_checkable
 class OutputRecord(Protocol):
     _api: str
     def dict(self) -> Dict: ...
     def schema(self) -> Dict: ...
+
+class OutputModel(Protocol):
+    _api: str
+    __private_attributes__: Dict
+    def schema(self) -> Dict: ...
+
 
 def empty_to_none(v: int|str|float|None) -> Optional[str]:
     if v in [0, 0.0, '', None]:
@@ -35,38 +43,37 @@ class NoneInt(PositiveInt):
 
 class Template(BaseModel):
     _api: str = PrivateAttr(default='TEMPLATE_V3')
-    Route: Optional[str] = Field(..., name='Route', alias='Route',  description='The unique route name', strip_whitespace=True, regex=REGEX_STR_ROUTE)
-    DeliveryMethod: str = Field(..., name='Mode of Transport', alias='DeliveryMethod', description='The mode of transport', strip_whitespace=True, regex=REGEX_STR_DELIVERY_METHOD)
-    PlaceOfLoad: str = Field(..., name='Place of load', strip_whitespace=True, regex=REGEX_STR_PLACE_OF_LOAD)
-    PlaceOfUnload: str = Field(..., strip_whitespace=True, regex=REGEX_STR_PLACE_OF_UNLOAD)
-    RouteDeparture: Optional[int]
-    DepartureDays: str = Field(..., strip_whitespace=True, regex=REGEX_STR_DEPARTURE_DAYS)
-    ForwardingAgent: Optional[str]
-    LeadTime: PositiveInt
-    LeadTimeOffset: Optional[NoneInt]
-    TransportationEquipment: Optional[str]
-    DaysToDeadline: Optional[NoneInt]
-    DeadlineHours: Optional[NoneInt]
-    DeadlineMinutes: Optional[NoneInt]
-    PickCutOffDays: Optional[NoneInt]
-    PickCutOffTimeHours: Optional[NoneInt]
-    PickCutOffTimeMinutes: Optional[NoneInt]
-    StipulatedInternalLeadTimeHours: Optional[NoneInt]
-    StipulatedInternalLeadTimeDays: Optional[NoneInt]
-    StipulatedInternalLeadTimeMinutes: Optional[NoneInt]
-    ForwardersArrivalLeadTimeDays: Optional[NoneInt]
-    ForwardersArrivalLeadTimeHours: Optional[NoneInt]
-    ForwardersArrivalLeadTimeMinutes: Optional[NoneInt]
-    TimeOfDepartureHours: Optional[NoneInt]
-    TimeOfDepartureMinutes: Optional[NoneInt]
-    TimeOfArrivalHoursLocalTime: Optional[NoneInt]
-    TimeOfArrivalMinutesLocalTime: Optional[NoneInt]
-    RouteResponsible: str
-    DepartureResponsible: str
-    CustomsDeclaration: Optional[bool]
-    AvoidConfirmedDeliveryOnWeekends: Optional[bool]
-    CreateSmartSheets: Optional[bool]
-    Comment: Optional[str]
+    ROUT: Optional[str] = Field(..., name='Route', strip_whitespace=True, regex=REGEX_STR_ROUTE)
+    EDEL: str = Field(..., name='Place of Load', strip_whitespace=True, regex=REGEX_STR_PLACE_OF_LOAD)
+    EDEU: str = Field(..., name='Place of Unload', strip_whitespace=True, regex=REGEX_STR_PLACE_OF_UNLOAD)
+    MODL: str = Field(..., name='Mode of Transport', strip_whitespace=True, regex=REGEX_STR_DELIVERY_METHOD)
+    RODN: Optional[PositiveInt] = Field(..., name='Route Departure')
+    DDOW: str = Field(..., name='Departure Days', strip_whitespace=True, regex=REGEX_STR_DEPARTURE_DAYS)
+    FWNO: Optional[str] = Field(..., name='ForwardingAgent', strip_whitespace=True)
+    ARDY: PositiveInt = Field(..., name='Lead Time')
+    ARDX: Optional[NoneInt] = Field(..., name='Lead Time Offset*')
+    TRCA: Optional[str] = Field(..., name='Transportation Equipment', min_length=3, max_length=3)
+    LILD: Optional[NoneInt] = Field(..., name='Days to Deadline')
+    LILH: Optional[NoneInt] = Field(..., name='Deadline Hours')
+    LILM: Optional[NoneInt] = Field(..., name='Deadline Minutes')
+    PCUD: Optional[NoneInt] = Field(..., name='Pick Cutoff Days')
+    PCUH: Optional[NoneInt] = Field(..., name='Pick Cutoff Hours')
+    PCUM: Optional[NoneInt] = Field(..., name='Pick Cutoff Minutes')
+    SILD: Optional[NoneInt] = Field(..., name='Stipulated Internal Lead Time Days')
+    SILH: Optional[NoneInt] = Field(..., name='Stipulated Internal Lead Time Hours')
+    SILM: Optional[NoneInt] = Field(..., name='Stipulated Internal Lead Time Minutes')
+    FWLD: Optional[NoneInt] = Field(..., name='Forwarders Arrival Lead Time Days')
+    FWLH: Optional[NoneInt] = Field(..., name='Forwarders Arrival Lead Time Hours')
+    FWLM: Optional[NoneInt] = Field(..., name='Forwarders Arrival Lead Time Minutes')
+    DETH: Optional[NoneInt] = Field(..., name='Time of Departure Hours')
+    DETM: Optional[NoneInt] = Field(..., name='Time of Departure Minutes')
+    ARHH: Optional[NoneInt] = Field(..., name='Time of Arrival Hours Local Time')
+    ARMM: Optional[NoneInt] = Field(..., name='Time of Arrival Minutes Local Time')
+    RRSP: str = Field(..., name='Route Responsible')
+    DRSP: str = Field(..., name='Departure Responsible')
+    CUSD: Optional[bool] = Field(..., name='CustomsDeclaration')
+    ADOW: Optional[bool] = Field(..., name='Avoid Confirmed Delivery on Weekends')
+    CMNT: Optional[str] = Field(..., name='Comment') 
 
 
 class Route(BaseModel):
@@ -110,7 +117,7 @@ class Departure(BaseModel):
 
 
 class Selection(BaseModel):
-    _api: str = PrivateAttr(default='MPD_DRS011_Create_CL')
+    _api: str = PrivateAttr(default='API_DRS011_Add')
     EDES: str
     PREX: str
     OBV1: Optional[str]

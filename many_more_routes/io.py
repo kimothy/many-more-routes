@@ -1,6 +1,7 @@
-from ctypes import alignment
 import openpyxl
 from openpyxl.styles import Alignment
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 from pathlib import Path
 
@@ -8,22 +9,15 @@ from typing import List
 from typing import Dict
 from typing import Optional
 from typing import Union
+from typing import Type
 
-from . models import OutputRecord
+from . models import OutputRecord, OutputModel
 
 
 ALIGNMENT_ROTATE = Alignment(
     horizontal='left',
     vertical='bottom',
     text_rotation=55,
-    shrink_to_fit=False,
-    wrap_text=False,
-    indent=0
-)
-
-ALIGNMENT_FLAT = Alignment(
-    horizontal='general',
-    text_rotation=0,
     shrink_to_fit=False,
     wrap_text=False,
     indent=0
@@ -52,17 +46,28 @@ def load_excel(file_path: Union[str, Path], sheet_name: Optional[str] = None) ->
     return [
         {
             header: col.value for (header, col) in zip(headers, sheet[row])
-        } for row in range(2, sheet.max_row + 1)
+        } for row in range(4, sheet.max_row + 1)
     ]
 
 
-def write_excel(records: List[OutputRecord], file_path: Union[str, Path]) -> None:
-    if isinstance(file_path, str):
-        file_path = str(Path(file_path).absolute())
-    else:
-        file_path = str(file_path.absolute())
+def write_header(sheet: Worksheet, record: Union[OutputRecord, OutputModel]) -> Worksheet:
+    sheet.cell(1, 1, 'Message')
+    sheet.cell(2, 1, 'Message').alignment = ALIGNMENT_ROTATE
+    sheet.cell(3, 1, 'no')
 
-    workbook = openpyxl.Workbook()
+    for index, (key, value) in enumerate(iterable=record.schema()['properties'].items(), start=2):
+        sheet.cell(1, index, key)
+        try:
+            sheet.cell(2, index, value['name']).alignment = ALIGNMENT_ROTATE
+        except:
+            sheet.cell(2, index, key).alignment = ALIGNMENT_ROTATE
+        sheet.cell(3, index, 'yes')  
+
+    return sheet
+
+
+def write_data(records: List[OutputRecord]) -> Workbook:
+    workbook = Workbook()
     sheet = workbook.active
     sheet.title = records[0]._api
 
@@ -77,20 +82,24 @@ def write_excel(records: List[OutputRecord], file_path: Union[str, Path]) -> Non
                 workbook.create_sheet(title=record._api)
 
             sheet = workbook[record._api]
-            sheet.cell(1, 1, 'Message')
-            sheet.cell(2, 1, 'Message').alignment = ALIGNMENT_ROTATE
-            sheet.cell(3, 1, 'no')
-
-            for index, (key, value) in enumerate(iterable=record.schema()['properties'].items(), start=2):
-                print(key, value, '\n\n\n')
-                sheet.cell(1, index, key)
-                sheet.cell(2, index, value['title']).alignment = ALIGNMENT_ROTATE
-                sheet.cell(3, index, 'yes')
+            sheet = write_header(sheet, record)
 
             counts[record._api] = 4
 
         for index, value in enumerate(iterable=record.dict().values(), start=2):
             sheet.cell(counts[record._api], index, value)
 
+    return workbook
 
-    workbook.save(filename=file_path)
+
+def save_template(record: OutputModel, path) -> None:
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = record.__private_attributes__['_api'].default
+    write_header(sheet, record)
+    workbook.save(path)
+
+
+def save_excel(records: List[OutputRecord], path=str) -> None:
+    workbook = write_data(records)
+    workbook.save(path)
