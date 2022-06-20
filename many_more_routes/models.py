@@ -7,6 +7,7 @@ from pydantic.validators import str_validator
 from typing import Optional
 from typing import Protocol
 from typing import Dict
+from typing import Union
 from typing import runtime_checkable
 
 REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
@@ -27,7 +28,7 @@ class OutputModel(Protocol):
     def schema(self) -> Dict: ...
 
 
-def empty_to_none(v: int|str|float|None) -> Optional[str]:
+def empty_to_none(v: Union[int, str, float, None]) -> Optional[str]:
     if v in [0, 0.0, '', None]:
         return None
     else:

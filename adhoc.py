@@ -1,3 +1,3 @@
-from many_more_routes.cli import cli
+from many_more_routes.client import app
 
-cli()
+app()
