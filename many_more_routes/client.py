@@ -29,16 +29,16 @@ def template(file_path: Path):
 
 @app.command()
 def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
+    records = map(lambda x: Template(**x), load_excel(in_file))
+
     if seed:
         routegen = generator(seed)
-
-    records = map(lambda x: Template(**x), load_excel(in_file))
+        for row in records:
+            if not row.ROUT:
+                row.ROUT = next(routegen)
 
     results: List[OutputRecord] = []
     for index, record in enumerate(records, 2):
-        if seed and not record.ROUT:
-            record.ROUT = next(routegen)
-
         results.append(record)
         results.append(MakeRoute(record))
         
