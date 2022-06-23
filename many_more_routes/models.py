@@ -16,17 +16,6 @@ REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
 REGEX_STR_DELIVERY_METHOD = "^\d{2}|\d{3}$"
 
-@runtime_checkable
-class OutputRecord(Protocol):
-    _api: str
-    def dict(self) -> Dict: ...
-    def schema(self) -> Dict: ...
-
-class OutputModel(Protocol):
-    _api: str
-    __private_attributes__: Dict
-    def schema(self) -> Dict: ...
-
 
 def empty_to_none(v: Union[int, str, float, None]) -> Optional[str]:
     if v in [0, 0.0, '', None]:

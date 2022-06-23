@@ -11,7 +11,7 @@ from . construct import MakeSelection
 from . construct import MakeCustomerExtension
 from . construct import MakeCustomerExtensionExtended
 
-from . models import OutputRecord
+from . ducks import OutputRecord
 from . models import Template
 
 from . io import load_excel
