@@ -46,11 +46,16 @@ def is_sequenceNumber_valid(sequenceNumber: str):
     except ValueError:
         return False
 
+    except TypeError:
+        return False
 
 def _generator(sequenceNumber: Optional[str] = None, n: Optional[int] = None) -> Generator:
     '''Returns a sequence generator. If n is not given it will loop infinitely'''
     if sequenceNumber:
         yield sequenceNumber
+
+    else:
+        sequenceNumber = 'AA0001'
 
     if n:
         for _ in range(n - 1):

@@ -124,7 +124,8 @@ def MakeCustomerExtensionExtended(data: Template) -> List[CustomerExtensionExten
         customer_extensions_extended_list.append(
             CustomerExtensionExtended(
                 FILE='DROUTE',
-                PK01=data.ROUT
+                PK01=data.ROUT,
+                CHB1=data.CUSD
             )
         )
 

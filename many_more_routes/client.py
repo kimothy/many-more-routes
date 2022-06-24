@@ -25,7 +25,7 @@ app = typer.Typer()
 
 @app.command()
 def template(file_path: Path):
-    save_template(Template, file_path) #ignore mypy error here
+    save_template(Template, file_path) #type: ignore
 
 @app.command()
 def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
@@ -52,8 +52,6 @@ def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
 
         for cusexex in MakeCustomerExtensionExtended(record):
             results.append(cusexex)
-
-        print(results)
 
     save_excel(results, out_file)
 

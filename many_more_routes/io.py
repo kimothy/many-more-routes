@@ -1,3 +1,4 @@
+from numpy import rec
 import openpyxl
 from openpyxl.styles import Alignment
 from openpyxl.workbook import Workbook
@@ -51,17 +52,16 @@ def load_excel(file_path: Union[str, Path], sheet_name: Optional[str] = None) ->
 
 
 def write_header(sheet: Worksheet, record: Union[OutputRecord, OutputModel]) -> Worksheet:
-    sheet.cell(1, 1, 'Message')
-    sheet.cell(2, 1, 'Message').alignment = ALIGNMENT_ROTATE
-    sheet.cell(3, 1, 'no')
-
-    for index, (key, value) in enumerate(iterable=record.schema()['properties'].items(), start=2):
+    for index, (key, value) in enumerate(iterable=record.schema()['properties'].items(), start=1):
         sheet.cell(1, index, key)
         try:
             sheet.cell(2, index, value['name']).alignment = ALIGNMENT_ROTATE
         except:
             sheet.cell(2, index, key).alignment = ALIGNMENT_ROTATE
-        sheet.cell(3, index, 'yes')  
+        sheet.cell(3, index, 'yes')
+
+    if hasattr(record, 'Message'):
+        sheet.cell(3, 1, 'no')
 
     return sheet
 
@@ -86,7 +86,7 @@ def write_data(records: List[OutputRecord]) -> Workbook:
 
             counts[record._api] = 4
 
-        for index, value in enumerate(iterable=record.dict().values(), start=2):
+        for index, value in enumerate(iterable=record.dict().values(), start=1):
             sheet.cell(counts[record._api], index, value)
 
     return workbook
