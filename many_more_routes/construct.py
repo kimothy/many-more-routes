@@ -1,8 +1,8 @@
-from .models import CustomerExtension, CustomerExtensionExtended, Template
+from .models import CustomerExtension, CustomerExtensionExtended, ValidatedTemplate
 from .models import Departure
 from .models import Route
 from .models import Selection
-from typing import Iterator, List, Optional
+from typing import Iterator, Optional
 from datetime import datetime
 from .methods import calc_departures, calc_route_departure, recalculate_lead_time
 
@@ -12,7 +12,7 @@ def tostr(string: Optional[str]) -> str:
     else:
         return string
 
-def MakeRoute(data: Template) -> Iterator[Route]:
+def MakeRoute(data: ValidatedTemplate) -> Iterator[Route]:
     data = data.copy()
 
     tostr = lambda x: str(x) if x != None else ''
@@ -34,7 +34,7 @@ def MakeRoute(data: Template) -> Iterator[Route]:
     )
 
 
-def MakeDeparture(data: Template) -> Iterator[Departure]:
+def MakeDeparture(data: ValidatedTemplate) -> Iterator[Departure]:
     data = data.copy()
 
     list_of_departure_days = [data.DDOW]\
@@ -72,7 +72,7 @@ def MakeDeparture(data: Template) -> Iterator[Departure]:
         )
 
 
-def MakeSelection(data: Template) -> Iterator[Selection]:
+def MakeSelection(data: ValidatedTemplate) -> Iterator[Selection]:
     data = data.copy()
     yield Selection.construct(
         EDES = data.EDEL,
@@ -92,7 +92,7 @@ def MakeSelection(data: Template) -> Iterator[Selection]:
 
 
 
-def MakeCustomerExtension(data: Template) -> Iterator[CustomerExtension]:
+def MakeCustomerExtension(data: ValidatedTemplate) -> Iterator[CustomerExtension]:
     data = data.copy()
 
     if data.PCUD or data.PCUH or data.PCUM:
@@ -111,7 +111,7 @@ def MakeCustomerExtension(data: Template) -> Iterator[CustomerExtension]:
             )
 
 
-def MakeCustomerExtensionExtended(data: Template) -> Iterator[CustomerExtensionExtended]:
+def MakeCustomerExtensionExtended(data: ValidatedTemplate) -> Iterator[CustomerExtensionExtended]:
     data = data.copy()
 
     if data.CUSD:

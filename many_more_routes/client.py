@@ -12,7 +12,7 @@ from . construct import MakeCustomerExtension
 from . construct import MakeCustomerExtensionExtended
 
 from . ducks import OutputRecord
-from . models import Template
+from . models import ValidatedTemplate
 
 from . io import load_excel
 from . io import save_excel
@@ -25,11 +25,11 @@ app = typer.Typer()
 
 @app.command()
 def template(file_path: Path):
-    save_template(Template, file_path) #type: ignore
+    save_template(ValidatedTemplate, file_path) #type: ignore
 
 @app.command()
 def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
-    records = map(lambda x: Template.construct(**x), load_excel(in_file))
+    records = map(lambda x: ValidatedTemplate.construct(**x), load_excel(in_file))
 
     if seed:
         routegen = generator(seed)

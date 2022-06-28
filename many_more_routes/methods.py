@@ -15,7 +15,7 @@ def calc_departures(departureDays: str, leadTime: int) -> List[str]:
     ['0100000', '0010000', '0001000', '0000100']
     '''
 
-    match departureDays:
+    match departureDays: # type: ignore[invalid-syntax]
         case list():
             departureDays = ''.join([str(n) for n in departureDays])
         case int():
