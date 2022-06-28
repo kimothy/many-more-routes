@@ -8,6 +8,14 @@ def calc_departures(departureDays: str, leadTime: int) -> List[str]:
 
     departureDays: str - A sting of length 7 containing only 0 and 1.
     leadTime: int - The lead time as a integer '''
+
+    match departureDays:
+        case list():
+            departureDays = ''.join([str(n) for n in departureDays])
+        case int():
+            departureDays = ''.join([str(n) for n in str(departureDays)])
+        case str():
+            pass
     
     departureDays = ''.join([str(n) for n in departureDays])
     leadTime = int(leadTime)
@@ -51,6 +59,8 @@ def recalculate_lead_time(departureDays: str, leadTime: int) -> int:
     leadTime is returned, if on a Sunday, leadTime + 1, if on a
     Saturday leadTime + 2. ValueError if no departure days.
     '''
+    departureDays = ''.join([str(n) for n in departureDays])
+    leadTime = int(leadTime)
 
     arrivalDay = (departureDays.index('1') + leadTime) % 7
 
