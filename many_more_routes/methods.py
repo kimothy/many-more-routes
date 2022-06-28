@@ -1,21 +1,25 @@
 from typing import List
-from typing import Union
-from typing import Optional
+
 
 def calc_departures(departureDays: str, leadTime: int) -> List[str]:
     ''' Calculates the required departure days to avoid confirming
     delivery days on weekends.
 
     departureDays: str - A sting of length 7 containing only 0 and 1.
-    leadTime: int - The lead time as a integer '''
+    leadTime: int - The lead time as a integer
+    
+    >>> calc_departures('1111100', 2)
+    ['1110000', '0001000', '0000100']
+    
+    >>> calc_departures('0111100', 3)
+    ['0100000', '0010000', '0001000', '0000100']
+    '''
 
     match departureDays:
         case list():
             departureDays = ''.join([str(n) for n in departureDays])
         case int():
             departureDays = ''.join([str(n) for n in str(departureDays)])
-        case str():
-            pass
     
     departureDays = ''.join([str(n) for n in departureDays])
     leadTime = int(leadTime)
@@ -58,6 +62,14 @@ def recalculate_lead_time(departureDays: str, leadTime: int) -> int:
     departure days and caluclates the arrival day, if on a weekday
     leadTime is returned, if on a Sunday, leadTime + 1, if on a
     Saturday leadTime + 2. ValueError if no departure days.
+    >>> recalculate_lead_time('0100000', 3)
+    3
+    >>> recalculate_lead_time('0010000', 3)
+    5
+    >>> recalculate_lead_time('0001000', 3)
+    4
+    >>> recalculate_lead_time('0000100', 3)
+    3
     '''
     departureDays = ''.join([str(n) for n in departureDays])
     leadTime = int(leadTime)
@@ -84,8 +96,14 @@ def calc_route_departure(departureDays: str, leadTime: int) -> int:
     leadTime is returned, if on a Sunday, leadTime + 1, if on a
     Saturday leadTime + 2.
     
-    ValueError if there are no departure days in the departureDays argument.
-    RuntimeError if no deparparture route departure is calculated.
+    >>> calc_route_departure('0100000', 3)
+    1
+    >>> calc_route_departure('0010000', 3)
+    2
+    >>> calc_route_departure('0001000', 3)
+    3
+    >>> calc_route_departure('0000100', 3)
+    4
     '''
 
     departureDay = departureDays.index('1')
@@ -105,3 +123,8 @@ def calc_route_departure(departureDays: str, leadTime: int) -> int:
 
     else:
         raise RuntimeError('Unable to calculate route departure')
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
