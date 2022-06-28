@@ -5,20 +5,17 @@ from pydantic import PrivateAttr
 from pydantic.validators import str_validator
 
 from typing import Optional
-from typing import Protocol
-from typing import Dict
 from typing import Union
-from typing import runtime_checkable
 
 REGEX_STR_ROUTE = "^[A-Z]{2}\d{4}$|^[A-Z]{6}$|^[A-Z]{3}_[A-Z]{2}$|^#[A-Z]{5}"
 REGEX_STR_PLACE_OF_LOAD = "^[A-Z]{3}"
-REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
+REGEX_STR_PLACE_OF_UNLOAD = "^[A-Z]{2}\d$|^[A-Z]{2}\d{2}$|^[A-Z]{3}$"
 REGEX_STR_DEPARTURE_DAYS = "^[0-1]{7}$"
-REGEX_STR_DELIVERY_METHOD = "^\d{2}|\d{3}$"
+REGEX_STR_MODE_OF_TRANSPORT = "^\d{2}|\d{3}$"
 
 
 def empty_to_none(v: Union[int, str, float, None]) -> Optional[str]:
-    if v in [0, 0.0, None]:
+    if v in [0, 0.0, None, '']:
         return None
     else:
         return str(v)
@@ -33,12 +30,12 @@ class NoneInt(NonNegativeInt):
 
 
 Message = Field('', name='Message')
-ROUT = Field(..., name='Route')
-EDEL = Field(..., name='Place of Load')
-EDEU = Field(..., name='Place of Unload')
-MODL = Field(..., name='Mode of Transport')
+ROUT = Field(..., name='Route', min_length=6, max_length=6, regex=REGEX_STR_ROUTE)
+EDEL = Field('', name='Place of Load', min_length=3, max_length=3, regex=REGEX_STR_PLACE_OF_LOAD)
+EDEU = Field('', name='Place of Unload', min_length=3, max_length=4, regex=REGEX_STR_PLACE_OF_UNLOAD)
+MODL = Field('', name='Mode of Transport', min_length=2, max_length=3, regex=REGEX_STR_MODE_OF_TRANSPORT)
 RODN = Field(..., name='Route Departure')
-DDOW = Field(..., name='Departure Days')
+DDOW = Field(..., name='Departure Days', min_length=7, max_length=7, regex=REGEX_STR_DEPARTURE_DAYS)
 FWNO = Field(None, name='ForwardingAgent')
 ARDY = Field(..., name='Lead Time')
 ARDX = Field(None, name='Lead Time Offset*')
@@ -82,17 +79,17 @@ FILE = Field(..., name='Table')
 PK01 = Field(..., name='Primary key 1')
 PK02 = Field('', name='Primary key 2')
 PK03 = Field('', name='Primary key 3')
-N096 = Field(0, name='Numeric field')
-N196 = Field(0, name='Numeric field')
-N296 = Field(0, name='Numeric field')
+N096 = Field(None, name='Numeric field')
+N196 = Field(None, name='Numeric field')
+N296 = Field(None, name='Numeric field')
 TX40 = Field(..., name='Description')
 TX15 = Field(..., name='Name')
 RESP = Field(..., name='Responsible')
 SDES = Field(..., name='Place')
 DLMC = Field(..., name='Manual shipment scheduling allowed')
 DLAC = Field(..., name='Ignore deadline when connecting dely no')
-TSID = Field(..., name='Transportation service ID')
-CHB1 = Field(False, name='Yes/No')
+TSID = Field('', name='Transportation service ID')
+CHB1 = Field(..., name='Yes/No')
 CMNT = Field(..., name='Comment') 
 
 
@@ -102,7 +99,7 @@ CMNT = Field(..., name='Comment')
 class StandardTemplate(BaseModel):
     _api: str = PrivateAttr(default='TEMPLATE_V3')
     Message: Optional[str] = ''
-    ROUT: Optional[str] = ROUT
+    ROUT: str = ROUT
     EDEL: str = EDEL
     EDEU: str = EDEU
     MODL: str = MODL
@@ -131,7 +128,7 @@ class StandardTemplate(BaseModel):
 
 class Template(BaseModel):
     _api: str = PrivateAttr(default='TEMPLATE_V3')
-    ROUT: Optional[str] = ROUT
+    ROUT: str = ROUT
     EDEL: str = EDEL
     EDEU: str = EDEU
     MODL: str = MODL
@@ -159,8 +156,8 @@ class Template(BaseModel):
     ARMM: Optional[NoneInt] = ARMM
     RRSP: str = RRSP
     DRSP: str = DRSP
-    CUSD: Optional[bool] = CUSD
-    ADOW: Optional[bool] = ADOW
+    CUSD: Optional[Union[int, bool]] = CUSD
+    ADOW: Optional[Union[int, bool]] = ADOW
     CMNT: Optional[str] = CMNT
 
     class Config:
@@ -219,7 +216,7 @@ class Selection(BaseModel):
     OBV3: Optional[str] = OBV3
     OBV4: Optional[str] = OBV4
     ROUT: Optional[str] = ROUT
-    RODN: PositiveInt = RODN
+    RODN: Optional[PositiveInt] = RODN
     SEFB: Optional[int] = SEFB
     SELP: Optional[int] = SELP
     DDOW: Optional[str] = DDOW
@@ -238,10 +235,9 @@ class CustomerExtension(BaseModel):
     Message: Optional[str] = Message
     FILE: str
     PK01: Optional[str] = PK01
-    N096: Optional[str] = N096
-    N196: Optional[str] = N196
-    N296: Optional[str] = N296
-
+    N096: Optional[NonNegativeInt] = N096
+    N196: Optional[NonNegativeInt] = N196
+    N296: Optional[NonNegativeInt] = N296
 
 
 class CustomerExtensionExtended(BaseModel):
@@ -249,4 +245,4 @@ class CustomerExtensionExtended(BaseModel):
     Message: Optional[str] = Message
     FILE: str = FILE
     PK01: Optional[str] = PK01
-    CHB1: Optional[bool] = CHB1
+    CHB1: Optional[Union[int, bool]] = CHB1

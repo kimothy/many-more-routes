@@ -2,21 +2,30 @@ from .models import CustomerExtension, CustomerExtensionExtended, Template
 from .models import Departure
 from .models import Route
 from .models import Selection
-from typing import List
+from typing import Iterator, List, Optional
 from datetime import datetime
 from .methods import calc_departures, calc_route_departure, recalculate_lead_time
 
+def tostr(string: Optional[str]) -> str:
+    if not string:
+        return ''
+    else:
+        return string
 
-def MakeRoute(data: Template) -> Route:
-    route = Route(
+def MakeRoute(data: Template) -> Iterator[Route]:
+    data = data.copy()
+
+    tostr = lambda x: str(x) if x != None else ''
+
+    yield Route.construct(
         ROUT=data.ROUT,
         RUTP=6,
-        TX40=data.EDEL\
-            + '_' + data.EDEU\
-            + '_' + data.MODL,
-        TX15=data.EDEL\
-            + '_' + data.EDEU\
-            + '_' + data.MODL,
+        TX40=tostr(data.EDEL)\
+            + '_' + tostr(data.EDEU)\
+            + '_' + tostr(data.MODL),
+        TX15=tostr(data.EDEL)\
+            + '_' + tostr(data.EDEU)\
+            + '_' + tostr(data.MODL),
         RESP=data.RRSP,
         SDES=data.EDEL,
         DLMC=1,
@@ -24,28 +33,22 @@ def MakeRoute(data: Template) -> Route:
         TSID=data.EDEU
     )
 
-    return route
 
+def MakeDeparture(data: Template) -> Iterator[Departure]:
+    data = data.copy()
 
-def MakeDeparture(data: Template) -> List[Departure]:
     list_of_departure_days = [data.DDOW]\
         if not data.ADOW\
         else calc_departures(data.DDOW, data.ARDY)
      
-    departures = []
-    for departureDays in list_of_departure_days:
-        if not data.RODN:
-            data.RODN = calc_route_departure(departureDays, data.ARDY)
-
-        if data.ADOW:
-            data.ARDY = recalculate_lead_time(departureDays, data.ARDY)
-
-        if data.ARDX:
-            data.ARDY = int(data.ARDX)
-
-        departure =  Departure(
+    for DDOW in list_of_departure_days:
+        RODN = calc_route_departure(DDOW, data.ARDY) if not data.RODN else data.RODN
+        ARDY = recalculate_lead_time(DDOW, data.ARDY) if data.ADOW else data.ARDY
+        ARDY = int(data.ARDX) if data.ARDX else ARDY
+    
+        yield Departure.construct(
             WWROUT = data.ROUT,
-            WWRODN = data.RODN,
+            WWRODN = RODN,
             WRRESP = data.DRSP,
             WRFWNO = data.FWNO,
             WRTRCA = data.TRCA,
@@ -59,21 +62,19 @@ def MakeDeparture(data: Template) -> List[Departure]:
             WEFWLD = data.FWLD,
             WEFWLH = data.FWLH,
             WEFWLM = data.FWLM,
-            WRDDOW = data.DDOW,
+            WRDDOW = DDOW,
             WRDETH = data.DETH,
             WRDETM = data.DETM,
             WRVFDT = datetime.now().strftime('%y%m%d'),
-            WRARDY = data.ARDY,
+            WRARDY = ARDY,
             WRARHH = data.ARHH,
             WRARMM = data.ARMM
         )
-        departures.append(departure)
-
-    return departures
 
 
-def MakeSelection(data: Template) -> Selection:
-    selection = Selection(
+def MakeSelection(data: Template) -> Iterator[Selection]:
+    data = data.copy()
+    yield Selection.construct(
         EDES = data.EDEL,
         PREX = ' 6',  # with preceeding space
         OBV1 = data.EDEU,
@@ -89,44 +90,33 @@ def MakeSelection(data: Template) -> Selection:
             else None
     )
 
-    return selection
 
 
-def MakeCustomerExtension(data: Template) -> List[CustomerExtension]:
-    list_of_customer_extensions = []
+def MakeCustomerExtension(data: Template) -> Iterator[CustomerExtension]:
+    data = data.copy()
 
     if data.PCUD or data.PCUH or data.PCUM:
-        list_of_customer_extensions.append(
-            CustomerExtension(
-                FILE='DROUDI',
-                PK01=data.ROUT,
-                N096=data.PCUD,
-                N196=data.PCUH,
-                N296=data.PCUM
-            )
+        yield CustomerExtension.construct(
+            FILE='DROUDI',
+            PK01=data.ROUT,
+            N096=data.PCUD if data.PCUD else None,
+            N196=data.PCUH if data.PCUH else None,
+            N296=data.PCUM if data.PCUM else None
         )
 
     if data.CUSD:
-        list_of_customer_extensions.append(
-            CustomerExtension(
+        yield CustomerExtension.construct(
                 FILE='DROUTE',
                 PK01=data.ROUT
             )
-        )
 
-    return list_of_customer_extensions
-    
 
-def MakeCustomerExtensionExtended(data: Template) -> List[CustomerExtensionExtended]:
-    customer_extensions_extended_list = []
+def MakeCustomerExtensionExtended(data: Template) -> Iterator[CustomerExtensionExtended]:
+    data = data.copy()
 
     if data.CUSD:
-        customer_extensions_extended_list.append(
-            CustomerExtensionExtended(
+        yield CustomerExtensionExtended.construct(
                 FILE='DROUTE',
                 PK01=data.ROUT,
                 CHB1=data.CUSD
             )
-        )
-
-    return customer_extensions_extended_list

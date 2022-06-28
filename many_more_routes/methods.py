@@ -3,9 +3,14 @@ from typing import Union
 from typing import Optional
 
 def calc_departures(departureDays: str, leadTime: int) -> List[str]:
-    '''
-    Takes the template and creates a set of route departures that avoids arrival on weekends
-    '''
+    ''' Calculates the required departure days to avoid confirming
+    delivery days on weekends.
+
+    departureDays: str - A sting of length 7 containing only 0 and 1.
+    leadTime: int - The lead time as a integer '''
+    
+    departureDays = ''.join([str(n) for n in departureDays])
+    leadTime = int(leadTime)
 
     departureArray = [
         ['0'] * 7,  # index 0, lead time bias of 0 days
@@ -16,7 +21,7 @@ def calc_departures(departureDays: str, leadTime: int) -> List[str]:
 
     departures = []
 
-    for n, departureDay in enumerate(departureDays):
+    for n in range(len(departureDays)):
         arrivalDay = (n + leadTime) % 7
 
         if departureDays[n] == '1':
@@ -90,4 +95,3 @@ def calc_route_departure(departureDays: str, leadTime: int) -> int:
 
     else:
         raise RuntimeError('Unable to calculate route departure')
-   

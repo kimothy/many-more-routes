@@ -29,7 +29,7 @@ def template(file_path: Path):
 
 @app.command()
 def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
-    records = list(map(lambda x: Template(**x), load_excel(in_file)))
+    records = map(lambda x: Template.construct(**x), load_excel(in_file))
 
     if seed:
         routegen = generator(seed)
@@ -40,18 +40,11 @@ def generate(in_file: Path, out_file: Path, seed: Optional[str] = None):
     results: List[OutputRecord] = []
     for record in records:
         results.append(record)
-        results.append(MakeRoute(record))
-        
-        for departure in MakeDeparture(record):
-            results.append(departure)
-
-        results.append(MakeSelection(record))
-
-        for cusex in MakeCustomerExtension(record):
-            results.append(cusex)
-
-        for cusexex in MakeCustomerExtensionExtended(record):
-            results.append(cusexex)
+        results.extend(MakeRoute(record))
+        results.extend(MakeDeparture(record))
+        results.extend(MakeSelection(record))
+        results.extend(MakeCustomerExtension(record))
+        results.extend(MakeCustomerExtensionExtended(record))
 
     save_excel(results, out_file)
 

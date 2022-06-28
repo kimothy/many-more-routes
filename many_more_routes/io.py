@@ -1,4 +1,3 @@
-from numpy import rec
 import openpyxl
 from openpyxl.styles import Alignment
 from openpyxl.workbook import Workbook
